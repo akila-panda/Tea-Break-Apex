@@ -7,12 +7,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <style>
 :root{
   --bg:#EFEFED; --card:#FFFFFF; --ink:#111112; --muted:#66666B; --line:#DADAD6;
   --red:#D8171E; --on-red:#FFFFFF; --red-soft:rgba(216,23,30,.09);
   --bar:#0A0A0B; --on-bar:#FFFFFF; --bar-dim:#3A3A3E;
-  --tint:rgba(17,17,18,.05);
+  --tint:rgba(17,17,18,.05); --ok:#1F9D55;
   color-scheme:light;
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px);
@@ -23,10 +24,11 @@
   --bg:#0C0C0D; --card:#171718; --ink:#F3F3F1; --muted:#9C9CA2; --line:#2B2B2E;
   --red:#EE3038; --on-red:#FFFFFF; --red-soft:rgba(238,48,56,.14);
   --bar:#000000; --bar-dim:#2E2E32;
-  --tint:rgba(255,255,255,.06);
+  --tint:rgba(255,255,255,.06); --ok:#3DD68C;
   color-scheme:dark;
 }
 *,*::before,*::after{box-sizing:inherit}
+[hidden]{display:none!important}
 html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 100px)}
 body{
   margin:0;background:var(--bg);color:var(--ink);
@@ -35,7 +37,7 @@ body{
 }
 .disp{font-family:"Barlow Condensed","Arial Narrow",Impact,system-ui,sans-serif}
 button{font:inherit;color:inherit;cursor:pointer;touch-action:manipulation}
-button:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+button:focus-visible,input:focus-visible{outline:3px solid var(--red);outline-offset:2px}
 
 /* ---------- Top bar: brand + live total + tach ---------- */
 .bar{
@@ -63,6 +65,53 @@ button:focus-visible{outline:3px solid var(--red);outline-offset:2px}
 .head{margin:2px 2px 16px}
 h1{margin:0;font-weight:800;font-size:2.1rem;line-height:1;letter-spacing:.01em;text-transform:uppercase}
 .date{margin:6px 0 0;color:var(--muted);font-size:.95rem}
+.live{display:inline-flex;align-items:center;gap:6px;margin-left:8px;font-size:.85rem;color:var(--muted)}
+.live::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--line)}
+.live.on::before{background:var(--ok)}
+
+/* ---------- Avatars ---------- */
+.av{
+  width:44px;height:44px;flex:none;border-radius:50%;display:grid;place-items:center;
+  background:var(--av);color:#fff;font-weight:700;font-size:1.25rem;line-height:1;overflow:hidden;
+}
+.av img{width:100%;height:100%;object-fit:cover}
+.av.sm{width:34px;height:34px;font-size:1rem}
+
+/* ---------- Who are you? ---------- */
+.people{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.person{
+  display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 6px 12px;
+  background:var(--card);border:1.5px solid var(--line);border-radius:14px;text-align:center;
+}
+.person .av{width:56px;height:56px;font-size:1.5rem}
+.person .pn{font-weight:700;font-size:1.3rem;line-height:1}
+.person .ps{font-size:.82rem;color:var(--muted);min-height:1.2em}
+.person.has{border-color:var(--red)}
+.person.has .ps{color:var(--red);font-weight:600}
+.person:active{transform:scale(.97)}
+.msg{padding:22px 16px;color:var(--muted);background:var(--card);border:1px solid var(--line);border-radius:14px}
+
+/* ---------- Me + ordering-for ---------- */
+.me{display:flex;align-items:center;gap:12px}
+.me h1{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.switch{height:40px;padding:0 14px;border-radius:10px;border:1.5px solid var(--line);background:transparent;font-weight:600;color:var(--muted)}
+.for{margin:0 0 14px}
+.for-l{font-weight:700;font-size:.95rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 2px 8px}
+.tabs{display:flex;flex-wrap:wrap;gap:8px}
+.tab{
+  height:44px;padding:0 16px;border-radius:999px;border:1.5px solid var(--line);background:var(--card);
+  font-weight:700;font-size:1.15rem;letter-spacing:.02em;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.tab[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.tab.add{border-style:dashed;color:var(--muted);background:transparent}
+.tab .c{margin-left:6px;color:var(--red)}
+.tab[aria-pressed="true"] .c{color:var(--red)}
+.gform{display:flex;gap:8px;margin-top:10px}
+.gform input{
+  flex:1;min-width:0;height:48px;padding:0 14px;border-radius:12px;border:1.5px solid var(--line);
+  background:var(--card);color:var(--ink);font:inherit;font-size:1.05rem;
+}
+.gform .btn{flex:0 0 auto;padding:0 18px;height:48px;font-size:1.15rem}
 
 /* ---------- Drink card ---------- */
 .card{
@@ -108,6 +157,9 @@ h1{margin:0;font-weight:800;font-size:2.1rem;line-height:1;letter-spacing:.01em;
 .mini button:disabled{opacity:.25;cursor:default}
 .mini output{min-width:1.4ch;text-align:center;font-weight:800;font-size:1.5rem;font-variant-numeric:tabular-nums}
 
+.mine{display:flex;justify-content:flex-end;align-items:center;gap:10px;margin:2px 0 0}
+.mine .note{flex:1;padding:0}
+
 /* ---------- Kitchen ticket ---------- */
 .ticket{
   background:var(--card);border:1px solid var(--line);border-radius:14px;margin-top:20px;overflow:hidden;
@@ -133,7 +185,20 @@ h1{margin:0;font-weight:800;font-size:2.1rem;line-height:1;letter-spacing:.01em;
 .btn:active{transform:scale(.98)}
 .btn:disabled{opacity:.35;cursor:default}
 .note{min-height:1.2em;margin:0;padding:0 16px 14px;color:var(--muted);font-size:.9rem}
-.foot{margin:22px 0 0;text-align:center;color:var(--muted);font-size:.85rem;letter-spacing:.04em}
+
+/* ---------- Who's having what ---------- */
+.sec-h{padding:14px 16px 4px;border-top:1px solid var(--line);font-weight:700;font-size:1rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.roster{padding:4px 16px 8px}
+.rp{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px dashed var(--line)}
+.rp:last-child{border-bottom:0}
+.rp .t{flex:1;min-width:0}
+.rp .rn{font-weight:700;font-size:1.2rem;line-height:1.1}
+.rp .rn em{font-style:normal;font-weight:500;font-family:"Barlow",system-ui,sans-serif;font-size:.85rem;color:var(--muted);margin-left:4px}
+.rp .rd{font-size:.92rem;color:var(--muted);margin-top:2px}
+.rp .rc{font-weight:800;font-size:1.5rem;color:var(--red);font-variant-numeric:tabular-nums}
+.rp.guest .av{background:transparent;color:var(--muted);border:1.5px dashed var(--line)}
+.waiting{padding:4px 16px 16px;color:var(--muted);font-size:.92rem}
+.waiting b{color:var(--ink);font-weight:600}
 
 @media (prefers-reduced-motion:reduce){
   .num.bump{animation:none}
@@ -144,6 +209,7 @@ h1{margin:0;font-weight:800;font-size:2.1rem;line-height:1;letter-spacing:.01em;
   .step{width:48px;height:48px}.step.plus{width:56px;height:56px}
   .num{font-size:2.5rem}
   .cup{display:none}
+  .people{grid-template-columns:repeat(2,1fr)}
 }
 .right{display:flex;align-items:center;gap:14px}
 .theme{
@@ -186,7 +252,7 @@ h1{margin:0;font-weight:800;font-size:2.1rem;line-height:1;letter-spacing:.01em;
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
           </button>
         </div>
-        <div class="odo disp" aria-live="polite"><b id="total">0</b><span>cups</span></div>
+        <div class="odo disp" aria-live="polite" title="Cups for the whole team today"><b id="total">0</b><span>cups</span></div>
       </div>
     </div>
     <div class="tach" id="tach" aria-hidden="true"></div>
@@ -194,70 +260,278 @@ h1{margin:0;font-weight:800;font-size:2.1rem;line-height:1;letter-spacing:.01em;
 </header>
 
 <div class="wrap">
-  <div class="head">
-    <h1 class="disp">Count the cups</h1>
-    <p class="date" id="date"></p>
-  </div>
 
-  <main id="drinks"></main>
-
-  <section class="ticket" aria-label="Order for the kitchen">
-    <div class="ticket-h disp"><h2>Kitchen order</h2><span id="tcount"></span></div>
-    <div id="lines"></div>
-    <div class="actions disp">
-      <button class="btn primary" id="copy">Copy order</button>
-      <button class="btn quiet" id="reset">Clear</button>
+  <!-- Screen 1: pick who you are -->
+  <section id="pick">
+    <div class="head">
+      <h1 class="disp">Who's having tea?</h1>
+      <p class="date"><span class="today"></span><span class="live">Connecting</span></p>
     </div>
-    <p class="note" id="note" aria-live="polite"></p>
+    <div class="people" id="people"><div class="msg">Loading the team…</div></div>
+  </section>
+
+  <!-- Screen 2: your order + team ticket -->
+  <section id="app" hidden>
+    <div class="head">
+      <div class="me">
+        <span class="av" id="me-av"></span>
+        <h1 class="disp" id="me-name"></h1>
+        <button class="switch" id="switch">Not you?</button>
+      </div>
+      <p class="date"><span class="today"></span><span class="live">Connecting</span></p>
+    </div>
+
+    <div class="for">
+      <div class="for-l disp">Ordering for</div>
+      <div class="tabs disp" id="tabs"></div>
+      <form class="gform" id="gform" hidden>
+        <input id="gname" type="text" maxlength="30" placeholder="Guest's name" autocomplete="off" aria-label="Guest's name">
+        <button class="btn primary disp" type="submit">Add</button>
+        <button class="btn quiet disp" type="button" id="gcancel">Cancel</button>
+      </form>
+    </div>
+
+    <main id="drinks"></main>
+
+    <div class="mine">
+      <p class="note" id="mynote" aria-live="polite"></p>
+      <button class="btn quiet disp" id="reset">Clear</button>
+    </div>
+
+    <section class="ticket" aria-label="Order for the kitchen">
+      <div class="ticket-h disp"><h2>Kitchen order</h2><span id="tcount"></span></div>
+      <div id="lines"></div>
+      <div class="actions disp">
+        <button class="btn primary" id="copy">Copy order</button>
+      </div>
+      <p class="note" id="note" aria-live="polite"></p>
+      <div class="sec-h disp">Who's having what</div>
+      <div id="roster"></div>
+      <p class="waiting" id="waiting"></p>
+    </section>
   </section>
 
 </div>
 
 <script>
 (function(){
+  var SUPABASE_URL = 'https://mnqokzuuucdvgjpskbva.supabase.co';
+  var SUPABASE_KEY = 'sb_publishable_h4nFLOnQesH7Vd-BnyJw2A_nxuCCG9g';
+
   var DRINKS = [
     {id:'coffee',  name:'Coffee',    c:'#5A3826'},
     {id:'plain',   name:'Plain Tea', c:'#D39A2E'},
     {id:'milk',    name:'Milk Tea',  c:'#D9B58F'},
     {id:'nescafe', name:'Nescafe',   c:'#A8512B'}
   ];
-  var KEY = 'teabreak-counts-v3';
-  var SEGS = 20, HOT = 16;
-  var state = {};
-  DRINKS.forEach(function(d){ state[d.id] = {n:0, hi:0, lo:0}; });
+  var AV_COLORS = ['#D8171E','#2B6CB0','#2F855A','#B7791F','#6B46C1','#C05621',
+                   '#00838F','#B83280','#4A5568','#2C7A7B','#9C4221','#5A67D8'];
+  var ME_KEY = 'teabreak-me';
+  var SEGS = 24, HOT = 20;
+
+  var db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  var people = [];        // [{id, name, photo_url}] in alphabetical order
+  var rows = {};          // key(person_id, guest) -> {person_id, guest_name, drinks}
+  var pending = {};       // keys with an unsaved local edit
+  var me = null;          // person id
+  var target = '';        // '' = me, otherwise a guest name
+  var day = today();
 
   function today(){
-    var t = new Date();
-    return t.getFullYear()+'-'+(t.getMonth()+1)+'-'+t.getDate();
+    var t = new Date(), p = function(n){ return (n < 10 ? '0' : '') + n; };
+    return t.getFullYear() + '-' + p(t.getMonth()+1) + '-' + p(t.getDate());
   }
-  function load(){
-    try{
-      var raw = localStorage.getItem(KEY);
-      if(!raw) return;
-      var saved = JSON.parse(raw);
-      if(!saved || saved.day !== today()) return;
-      DRINKS.forEach(function(d){
-        var s = saved.data && saved.data[d.id];
-        if(s) state[d.id] = {n:s.n|0, hi:s.hi|0, lo:s.lo|0};
-      });
-    }catch(e){}
+  function key(pid, g){ return pid + '|' + (g || ''); }
+  function esc(s){
+    return String(s).replace(/[&<>"']/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
   }
-  function save(){
-    try{ localStorage.setItem(KEY, JSON.stringify({day:today(), data:state})); }catch(e){}
-  }
+  function $(id){ return document.getElementById(id); }
   function buzz(){ try{ if(navigator.vibrate) navigator.vibrate(8); }catch(e){} }
+  function person(id){ for(var i=0;i<people.length;i++) if(people[i].id === id) return people[i]; return null; }
 
+  function blank(){
+    var d = {};
+    DRINKS.forEach(function(x){ d[x.id] = {n:0, hi:0, lo:0}; });
+    return d;
+  }
+  function clean(raw){
+    var d = blank();
+    DRINKS.forEach(function(x){
+      var s = raw && raw[x.id];
+      if(s) d[x.id] = {n:s.n|0, hi:s.hi|0, lo:s.lo|0};
+      fix(d[x.id]);
+    });
+    return d;
+  }
   function fix(s){
     if(s.n < 0) s.n = 0;
+    if(s.hi < 0) s.hi = 0;
+    if(s.lo < 0) s.lo = 0;
     if(s.hi + s.lo > s.n){
       var over = s.hi + s.lo - s.n;
       var cut = Math.min(over, s.lo); s.lo -= cut; over -= cut;
       s.hi -= over;
     }
   }
+  function cups(d){ var t = 0; DRINKS.forEach(function(x){ t += d[x.id].n; }); return t; }
+  function row(pid, g){
+    var k = key(pid, g);
+    if(!rows[k]) rows[k] = {person_id:pid, guest_name:g || '', drinks:blank()};
+    return rows[k];
+  }
+  function cur(){ return row(me, target).drinks; }
+  function guestsOf(pid){
+    var out = [];
+    Object.keys(rows).forEach(function(k){
+      var r = rows[k];
+      if(r.person_id === pid && r.guest_name) out.push(r.guest_name);
+    });
+    return out.sort(function(a,b){ return a.localeCompare(b); });
+  }
 
-  /* tach segments */
-  var tach = document.getElementById('tach');
+  /* ---------- avatars ---------- */
+  function avatar(p, cls){
+    var i = people.indexOf(p);
+    var color = AV_COLORS[(i < 0 ? 0 : i) % AV_COLORS.length];
+    var inner = p.photo_url ? '<img src="'+esc(p.photo_url)+'" alt="">' : esc(p.name.charAt(0).toUpperCase());
+    return '<span class="av'+(cls ? ' '+cls : '')+'" style="--av:'+color+'" aria-hidden="true">'+inner+'</span>';
+  }
+
+  /* ---------- talking to Supabase ---------- */
+  var timers = {};
+  function queueSave(pid, g){
+    var k = key(pid, g);
+    pending[k] = true;
+    clearTimeout(timers[k]);
+    timers[k] = setTimeout(function(){ saveNow(pid, g); }, 350);
+  }
+  function saveNow(pid, g){
+    var k = key(pid, g), r = rows[k];
+    if(!r) return;
+    db.from('orders').upsert(
+      {person_id:pid, day:day, guest_name:g || '', drinks:r.drinks, updated_at:new Date().toISOString()},
+      {onConflict:'person_id,day,guest_name'}
+    ).then(function(res){
+      if(res.error){ myNote('Not saved — check your connection. Retrying…'); setTimeout(function(){ saveNow(pid, g); }, 3000); return; }
+      if(!timers[k] || pending[k]) delete pending[k];
+    });
+  }
+  function removeGuest(g){
+    var k = key(me, g);
+    clearTimeout(timers[k]); delete pending[k]; delete rows[k];
+    target = '';
+    render();
+    db.from('orders').delete().match({person_id:me, day:day, guest_name:g}).then(function(res){
+      if(res.error) myNote('Could not remove ' + g + ' — try again.');
+    });
+  }
+
+  var fetchT;
+  function refreshSoon(){ clearTimeout(fetchT); fetchT = setTimeout(fetchOrders, 150); }
+  function fetchOrders(){
+    return db.from('orders').select('person_id,guest_name,drinks').eq('day', day).then(function(res){
+      if(res.error){ setLive(false); return; }
+      var next = {};
+      res.data.forEach(function(r){
+        next[key(r.person_id, r.guest_name)] = {person_id:r.person_id, guest_name:r.guest_name, drinks:clean(r.drinks)};
+      });
+      // keep anything this device is still saving
+      Object.keys(pending).forEach(function(k){ if(rows[k]) next[k] = rows[k]; });
+      rows = next;
+      if(target && !rows[key(me, target)]) target = '';
+      render();
+    });
+  }
+  function fetchPeople(){
+    return db.from('people').select('id,name,photo_url').eq('active', true).order('name').then(function(res){
+      if(res.error) throw res.error;
+      people = res.data;
+    });
+  }
+
+  var live = false;
+  function setLive(on){
+    live = on;
+    Array.prototype.forEach.call(document.querySelectorAll('.live'), function(el){
+      el.classList.toggle('on', on);
+      el.textContent = on ? 'Live' : 'Offline';
+    });
+  }
+  function subscribe(){
+    db.channel('orders-live')
+      .on('postgres_changes', {event:'*', schema:'public', table:'orders'}, refreshSoon)
+      .subscribe(function(status){
+        setLive(status === 'SUBSCRIBED');
+        if(status === 'SUBSCRIBED') refreshSoon();
+      });
+  }
+
+  /* ---------- screen 1: who are you ---------- */
+  function renderPeople(){
+    var box = $('people');
+    if(!people.length){ box.innerHTML = '<div class="msg">No team members found.</div>'; return; }
+    box.innerHTML = '';
+    people.forEach(function(p){
+      var n = 0;
+      Object.keys(rows).forEach(function(k){ if(rows[k].person_id === p.id) n += cups(rows[k].drinks); });
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'person' + (n ? ' has' : '');
+      b.innerHTML = avatar(p) + '<span class="pn disp">'+esc(p.name)+'</span><span class="ps">'+(n ? n + (n === 1 ? ' cup' : ' cups') : '')+'</span>';
+      b.onclick = function(){ choose(p.id); };
+      box.appendChild(b);
+    });
+  }
+  function choose(id){
+    me = id; target = '';
+    try{ localStorage.setItem(ME_KEY, String(id)); }catch(e){}
+    $('pick').hidden = true; $('app').hidden = false;
+    window.scrollTo(0, 0);
+    render();
+  }
+  $('switch').onclick = function(){
+    me = null;
+    try{ localStorage.removeItem(ME_KEY); }catch(e){}
+    $('app').hidden = true; $('pick').hidden = false;
+    render();
+  };
+
+  /* ---------- ordering for: me / guests ---------- */
+  function renderTabs(){
+    var box = $('tabs');
+    box.innerHTML = '';
+    function tab(label, g, n){
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'tab';
+      b.setAttribute('aria-pressed', target === g ? 'true' : 'false');
+      b.innerHTML = esc(label) + (n ? '<span class="c">'+n+'</span>' : '');
+      b.onclick = function(){ target = g; $('gform').hidden = true; render(); };
+      box.appendChild(b);
+    }
+    tab('Me', '', cups(row(me, '').drinks));
+    guestsOf(me).forEach(function(g){ tab(g, g, cups(rows[key(me, g)].drinks)); });
+    var add = document.createElement('button');
+    add.type = 'button'; add.className = 'tab add'; add.textContent = '+ Guest';
+    add.onclick = function(){ $('gform').hidden = false; $('gname').value = ''; $('gname').focus(); };
+    box.appendChild(add);
+  }
+  $('gform').onsubmit = function(ev){
+    ev.preventDefault();
+    var g = $('gname').value.replace(/\s+/g, ' ').trim();
+    if(!g) return;
+    var taken = guestsOf(me).filter(function(x){ return x.toLowerCase() === g.toLowerCase(); })[0];
+    if(taken){ g = taken; }
+    else { row(me, g); queueSave(me, g); }
+    target = g;
+    $('gform').hidden = true;
+    render();
+  };
+  $('gcancel').onclick = function(){ $('gform').hidden = true; };
+
+  /* ---------- drink cards (same as before, now editing the selected person) ---------- */
+  var tach = $('tach');
   var segs = [];
   for(var i=0;i<SEGS;i++){
     var el = document.createElement('i');
@@ -265,9 +539,7 @@ h1{margin:0;font-weight:800;font-size:2.1rem;line-height:1;letter-spacing:.01em;
     tach.appendChild(el); segs.push(el);
   }
 
-  var host = document.getElementById('drinks');
   var els = {};
-
   function cupSvg(c){
     return '<svg class="cup" viewBox="0 0 48 48" aria-hidden="true" style="--c:'+c+'">' +
       '<path class="steam" d="M15 4c-2 3 2 4 0 8M23 4c-2 3 2 4 0 8"/>' +
@@ -279,6 +551,7 @@ h1{margin:0;font-weight:800;font-size:2.1rem;line-height:1;letter-spacing:.01em;
   }
 
   function build(){
+    var host = $('drinks');
     DRINKS.forEach(function(d){
       var card = document.createElement('section');
       card.className = 'card';
@@ -307,13 +580,13 @@ h1{margin:0;font-weight:800;font-size:2.1rem;line-height:1;letter-spacing:.01em;
         hiM:q('.sg.hi .m'), hiP:q('.sg.hi .p'), loM:q('.sg.lo .m'), loP:q('.sg.lo .p'),
         last:0
       };
-      var s = state[d.id];
-      e.plus.onclick  = function(){ s.n++; buzz(); update(); };
-      e.minus.onclick = function(){ if(s.n>0){ s.n--; fix(s); buzz(); update(); } };
-      e.hiP.onclick = function(){ if(s.hi+s.lo < s.n){ s.hi++; buzz(); update(); } };
-      e.hiM.onclick = function(){ if(s.hi>0){ s.hi--; buzz(); update(); } };
-      e.loP.onclick = function(){ if(s.hi+s.lo < s.n){ s.lo++; buzz(); update(); } };
-      e.loM.onclick = function(){ if(s.lo>0){ s.lo--; buzz(); update(); } };
+      function edit(fn){ return function(){ var s = cur()[d.id]; if(fn(s) !== false){ fix(s); buzz(); queueSave(me, target); render(); } }; }
+      e.plus.onclick  = edit(function(s){ s.n++; });
+      e.minus.onclick = edit(function(s){ if(s.n > 0) s.n--; else return false; });
+      e.hiP.onclick = edit(function(s){ if(s.hi+s.lo < s.n) s.hi++; else return false; });
+      e.hiM.onclick = edit(function(s){ if(s.hi > 0) s.hi--; else return false; });
+      e.loP.onclick = edit(function(s){ if(s.hi+s.lo < s.n) s.lo++; else return false; });
+      e.loM.onclick = edit(function(s){ if(s.lo > 0) s.lo--; else return false; });
     });
   }
 
@@ -323,27 +596,41 @@ h1{margin:0;font-weight:800;font-size:2.1rem;line-height:1;letter-spacing:.01em;
     if(s.lo) parts.push(s.lo + ' low sugar');
     return parts.join(', ');
   }
-
-  function orderText(){
-    var lines = [];
-    DRINKS.forEach(function(d){
-      var s = state[d.id];
-      if(s.n > 0){
-        var n = notes(s);
-        lines.push(s.n + ' ' + d.name + (n ? ' (' + n + ')' : ''));
-      }
+  function summary(d){
+    var parts = [];
+    DRINKS.forEach(function(x){
+      var s = d[x.id];
+      if(s.n > 0){ var n = notes(s); parts.push(s.n + ' ' + x.name + (n ? ' (' + n + ')' : '')); }
     });
-    return lines.join('\n');
+    return parts.join(', ');
+  }
+  function teamTotals(){
+    var t = blank();
+    Object.keys(rows).forEach(function(k){
+      var d = rows[k].drinks;
+      DRINKS.forEach(function(x){ t[x.id].n += d[x.id].n; t[x.id].hi += d[x.id].hi; t[x.id].lo += d[x.id].lo; });
+    });
+    return t;
+  }
+  // everyone with an order, alphabetical, each person's guests right after them
+  function orderedRows(){
+    var out = [];
+    people.forEach(function(p){
+      var own = rows[key(p.id, '')];
+      if(own && cups(own.drinks)) out.push(own);
+      guestsOf(p.id).forEach(function(g){ var r = rows[key(p.id, g)]; if(cups(r.drinks)) out.push(r); });
+    });
+    return out;
   }
 
-  function renderLines(){
-    var box = document.getElementById('lines');
+  function renderLines(t){
+    var box = $('lines');
     box.innerHTML = '';
     var any = false;
     var wrap = document.createElement('div');
     wrap.className = 'lines';
     DRINKS.forEach(function(d){
-      var s = state[d.id];
+      var s = t[d.id];
       if(s.n <= 0) return;
       any = true;
       var row = document.createElement('div');
@@ -359,18 +646,40 @@ h1{margin:0;font-weight:800;font-size:2.1rem;line-height:1;letter-spacing:.01em;
     else {
       var none = document.createElement('div');
       none.className = 'none';
-      none.textContent = 'Nothing counted yet. Tap + on a drink to start.';
+      none.textContent = 'Nothing ordered yet today. Tap + on a drink to start.';
       box.appendChild(none);
     }
     return any;
   }
 
-  function update(){
-    var total = 0;
-    DRINKS.forEach(function(d){
-      var s = state[d.id], e = els[d.id];
-      fix(s);
-      total += s.n;
+  function renderRoster(){
+    var list = orderedRows();
+    var box = $('roster');
+    if(!list.length){ box.innerHTML = ''; }
+    else {
+      box.innerHTML = '<div class="roster">' + list.map(function(r){
+        var p = person(r.person_id) || {name:'?'};
+        var guest = !!r.guest_name;
+        var av = guest ? '<span class="av sm" aria-hidden="true">+</span>' : avatar(p, 'sm');
+        var title = guest ? esc(r.guest_name) + '<em>'+esc(p.name)+'’s guest</em>' : esc(p.name);
+        return '<div class="rp'+(guest ? ' guest' : '')+'">' + av +
+          '<div class="t"><div class="rn disp">'+title+'</div><div class="rd">'+esc(summary(r.drinks))+'</div></div>' +
+          '<div class="rc disp">'+cups(r.drinks)+'</div></div>';
+      }).join('') + '</div>';
+    }
+    var waiting = people.filter(function(p){ var r = rows[key(p.id, '')]; return !r || !cups(r.drinks); });
+    $('waiting').innerHTML = !waiting.length ? 'Everyone has ordered.' :
+      'Not ordered yet: <b>' + waiting.map(function(p){ return esc(p.name); }).join(', ') + '</b>';
+  }
+
+  function renderApp(){
+    var p = person(me);
+    $('me-av').outerHTML = avatar(p).replace('class="av"', 'class="av" id="me-av"');
+    $('me-name').textContent = p.name;
+    renderTabs();
+    var d = cur();
+    DRINKS.forEach(function(x){
+      var s = d[x.id], e = els[x.id];
       if(e.last !== s.n){
         e.num.classList.remove('bump'); void e.num.offsetWidth; e.num.classList.add('bump');
         e.last = s.n;
@@ -387,25 +696,54 @@ h1{margin:0;font-weight:800;font-size:2.1rem;line-height:1;letter-spacing:.01em;
       e.loBox.classList.toggle('on', s.lo > 0);
       e.sub.textContent = s.n === 0 ? '' : (s.n - s.hi - s.lo) + ' normal sugar';
     });
-    document.getElementById('total').textContent = total;
-    for(var i=0;i<SEGS;i++) segs[i].classList.toggle('on', i < total);
-    var any = renderLines();
-    document.getElementById('tcount').textContent = any ? total + (total === 1 ? ' cup' : ' cups') : '';
-    document.getElementById('copy').disabled = !any;
-    save();
+    if(!armed) $('reset').textContent = target ? 'Remove guest' : 'Clear';
+    $('reset').disabled = !target && cups(d) === 0;
+    var t = teamTotals(), total = cups(t);
+    var any = renderLines(t);
+    $('tcount').textContent = any ? total + (total === 1 ? ' cup' : ' cups') : '';
+    $('copy').disabled = !any;
+    renderRoster();
   }
 
-  var noteT;
+  function render(){
+    var total = cups(teamTotals());
+    $('total').textContent = total;
+    for(var i=0;i<SEGS;i++) segs[i].classList.toggle('on', i < total);
+    if(me !== null && person(me)) renderApp();
+    else renderPeople();
+  }
+
+  /* ---------- notes, copy, clear ---------- */
+  var noteT, myNoteT;
   function setNote(msg){
-    var n = document.getElementById('note');
+    var n = $('note');
     n.textContent = msg;
     clearTimeout(noteT);
     noteT = setTimeout(function(){ n.textContent = ''; }, 2500);
   }
+  function myNote(msg){
+    var n = $('mynote');
+    n.textContent = msg;
+    clearTimeout(myNoteT);
+    myNoteT = setTimeout(function(){ n.textContent = ''; }, 4000);
+  }
 
-  document.getElementById('copy').onclick = function(){
-    var total = document.getElementById('total').textContent;
-    var txt = 'Tea break order\n' + orderText() + '\nTotal: ' + total;
+  function orderText(){
+    var t = teamTotals(), lines = [];
+    DRINKS.forEach(function(d){
+      var s = t[d.id];
+      if(s.n > 0){ var n = notes(s); lines.push(s.n + ' ' + d.name + (n ? ' (' + n + ')' : '')); }
+    });
+    var who = orderedRows().map(function(r){
+      var p = person(r.person_id) || {name:'?'};
+      var label = r.guest_name ? r.guest_name + ' (' + p.name + '’s guest)' : p.name;
+      return '- ' + label + ': ' + summary(r.drinks);
+    });
+    return 'Tea break order\n' + lines.join('\n') + '\nTotal: ' + cups(t) + '\n\nWho’s having what\n' + who.join('\n');
+  }
+
+  $('copy').onclick = function(){
+    var txt = orderText();
     function fallback(){
       try{
         var ta = document.createElement('textarea');
@@ -422,25 +760,40 @@ h1{margin:0;font-weight:800;font-size:2.1rem;line-height:1;letter-spacing:.01em;
     }catch(e){ fallback(); }
   };
 
-  var resetBtn = document.getElementById('reset');
+  var resetBtn = $('reset');
   var armed = false, timer;
+  function disarm(){ clearTimeout(timer); armed = false; resetBtn.classList.remove('armed'); }
   resetBtn.onclick = function(){
     if(!armed){
       armed = true; resetBtn.textContent = 'Tap to confirm'; resetBtn.classList.add('armed');
-      timer = setTimeout(function(){ armed = false; resetBtn.textContent = 'Clear'; resetBtn.classList.remove('armed'); }, 3000);
+      timer = setTimeout(function(){ disarm(); render(); }, 3000);
       return;
     }
-    clearTimeout(timer); armed = false; resetBtn.textContent = 'Clear'; resetBtn.classList.remove('armed');
-    DRINKS.forEach(function(d){ var s = state[d.id]; s.n = 0; s.hi = 0; s.lo = 0; });
-    update();
+    disarm();
+    if(target){ removeGuest(target); return; }
+    row(me, '').drinks = blank();
+    queueSave(me, '');
+    render();
   };
 
-  document.getElementById('date').textContent =
-    new Date().toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long'});
+  /* ---------- date + daily reset ---------- */
+  function showDate(){
+    var txt = new Date().toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long'});
+    Array.prototype.forEach.call(document.querySelectorAll('.today'), function(el){ el.textContent = txt; });
+  }
+  function checkDay(){
+    if(today() === day) return;
+    day = today(); rows = {}; pending = {}; target = '';
+    showDate(); render(); fetchOrders();
+  }
+  setInterval(checkDay, 30000);
+  document.addEventListener('visibilitychange', function(){
+    if(document.visibilityState === 'visible'){ checkDay(); fetchOrders(); }
+  });
 
-  /* theme toggle: light by default */
+  /* ---------- theme toggle: light by default ---------- */
   var root = document.documentElement;
-  var bL = document.getElementById('th-light'), bD = document.getElementById('th-dark');
+  var bL = $('th-light'), bD = $('th-dark');
   function applyTheme(t, persist){
     root.setAttribute('data-theme', t);
     bL.setAttribute('aria-pressed', t === 'light' ? 'true' : 'false');
@@ -451,7 +804,16 @@ h1{margin:0;font-weight:800;font-size:2.1rem;line-height:1;letter-spacing:.01em;
   bD.onclick = function(){ applyTheme('dark', true); };
   applyTheme(root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light', false);
 
-  load(); build(); update();
+  /* ---------- start ---------- */
+  showDate(); build();
+  fetchPeople().then(function(){
+    var saved = null;
+    try{ saved = parseInt(localStorage.getItem(ME_KEY), 10); }catch(e){}
+    return fetchOrders().then(function(){ if(saved && person(saved)) choose(saved); });
+  }).then(subscribe).catch(function(){
+    $('people').innerHTML = '<div class="msg">Can’t reach the team database. Check your connection and refresh.</div>';
+    setLive(false);
+  });
 })();
 </script>
 </body>
