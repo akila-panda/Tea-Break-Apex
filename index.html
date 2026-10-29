@@ -141,7 +141,7 @@ h1{margin:0;font-weight:800;font-size:2.1rem;line-height:1;letter-spacing:.01em;
 @keyframes bump{0%{transform:scale(1)}40%{transform:scale(1.18)}100%{transform:scale(1)}}
 
 /* ---------- Sugar ---------- */
-.sugar{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;padding-left:4px}
+.sugar{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;margin-top:14px;padding-left:4px}
 .sg{
   display:flex;align-items:center;justify-content:space-between;gap:4px;
   background:var(--tint);border:1.5px solid transparent;border-radius:12px;padding:5px 5px 5px 12px;
@@ -223,8 +223,21 @@ h1{margin:0;font-weight:800;font-size:2.1rem;line-height:1;letter-spacing:.01em;
   .num.bump{animation:none}
   .tach i{transition:none}
 }
-@media (max-width:370px){
+/* Phones: keep the steppers and sugar buttons inside the card */
+@media (max-width:420px){
+  .card{padding:12px}
+  .top{gap:8px}
+  .cup{width:40px;height:40px}
   .name{font-size:1.4rem}
+  .step{width:48px;height:48px}.step.plus{width:56px;height:56px}
+  .num{font-size:2.5rem}
+  .sugar{gap:8px}
+  .sg{padding-left:9px;gap:2px}
+  .sg .lbl{gap:5px}
+  .mini button{width:34px}
+}
+@media (max-width:370px){
+  .name{font-size:1.3rem}
   .step{width:48px;height:48px}.step.plus{width:56px;height:56px}
   .num{font-size:2.5rem}
   .cup{display:none}
@@ -339,6 +352,8 @@ h1{margin:0;font-weight:800;font-size:2.1rem;line-height:1;letter-spacing:.01em;
 
   var DRINKS = [
     {id:'coffee',  name:'Coffee',    c:'#5A3826'},
+    {id:'black',   name:'Black Coffee', c:'#24150E'},
+    {id:'milkcof', name:'Milk Coffee',  c:'#B98A62'},
     {id:'plain',   name:'Plain Tea', c:'#D39A2E'},
     {id:'milk',    name:'Milk Tea',  c:'#D9B58F'},
     {id:'nescafe', name:'Nescafe',   c:'#A8512B'}
