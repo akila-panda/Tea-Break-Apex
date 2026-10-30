@@ -9,7 +9,7 @@ create table people (
 );
 
 insert into people (name) values
-  ('Akila'),('Amila'),('Asanka'),('Ashir'),('Aswitha'),('Denura'),
+  ('Akila'),('Amila'),('Asanka'),('Ashir'),('Ashvitha'),('Denura'),
   ('Dilhani'),('Sadath'),('Shayan'),('Vidura'),('Vishwa'),('Yashodara');
 
 -- One row per person per day; guest orders get their own row (guest_name filled in)
